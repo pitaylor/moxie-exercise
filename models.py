@@ -70,4 +70,4 @@ class Appointment(BaseModel):
         table_name = "appointments"
 
 
-AppointmentService = Appointment.services.get_through_model()
+AppointmentService = Appointment.services.through_model

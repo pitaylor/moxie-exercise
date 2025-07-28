@@ -55,12 +55,9 @@ def get_appointment(appointment_id: int, medspa_id: int = Depends(get_medspa_id)
 
 @router.get("/", response_model=List[AppointmentResponse])
 def get_all_appointments(medspa_id: int = Depends(get_medspa_id)):
-    # todo: prefetch services
     appointments = Appointment.select().where(Appointment.medspa_id == medspa_id)
 
-    result = []
+    # Prefetch associations to avoid N+1 queries
+    appointments = prefetch(appointments, AppointmentService, Service)
 
-    for appointment in appointments:
-        result.append(AppointmentResponse.from_model(appointment))
-
-    return result
+    return [AppointmentResponse.from_model(appointment) for appointment in appointments]
