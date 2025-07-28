@@ -1,3 +1,4 @@
+import os
 from enum import Enum
 from peewee import (
     BigAutoField,
@@ -12,7 +13,8 @@ from peewee import (
     ManyToManyField,
 )
 
-db = PostgresqlDatabase("moxiedb")
+DB_NAME = os.getenv("DATABASE_NAME", "moxiedb")
+db = PostgresqlDatabase(DB_NAME)
 
 
 class AppointmentStatus(Enum):

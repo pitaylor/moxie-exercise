@@ -10,6 +10,10 @@ tasks:
     desc: Start FastAPI development server
     cmd: uv run fastapi dev main.py
 
+  test:
+    desc: Run tests
+    cmd: uv run pytest
+
   db:create:
     desc: Create PostgreSQL database, schema and sample data
     cmds:
