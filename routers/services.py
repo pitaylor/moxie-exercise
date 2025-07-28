@@ -16,7 +16,7 @@ def create_service(service: ServiceCreate, medspa_id: int = Depends(get_medspa_i
         price=service.price,
         duration=service.duration,
     )
-    return ServiceResponse.model_validate(new_service)
+    return ServiceResponse.from_model(new_service)
 
 
 @router.post("/{service_id}", response_model=ServiceResponse)
@@ -35,7 +35,7 @@ def update_service(
         # Reload model with updates
         service = Service.get(criteria)
 
-        return ServiceResponse.model_validate(service)
+        return ServiceResponse.from_model(service)
     except Service.DoesNotExist:
         raise HTTPException(status_code=404, detail="Service not found")
 
@@ -44,7 +44,7 @@ def update_service(
 def get_service(service_id: int, medspa_id: int = Depends(get_medspa_id)):
     try:
         service = Service.get((Service.id == service_id) & (Service.medspa_id == medspa_id))
-        return ServiceResponse.model_validate(service)
+        return ServiceResponse.from_model(service)
     except Service.DoesNotExist:
         raise HTTPException(status_code=404, detail="Service not found")
 
@@ -52,4 +52,4 @@ def get_service(service_id: int, medspa_id: int = Depends(get_medspa_id)):
 @router.get("/", response_model=List[ServiceResponse])
 def get_all_services(medspa_id: int = Depends(get_medspa_id)):
     services = Service.select().where(Service.medspa_id == medspa_id)
-    return [ServiceResponse.model_validate(service) for service in services]
+    return [ServiceResponse.from_model(service) for service in services]
