@@ -1,0 +1,15 @@
+# https://taskfile.dev
+
+version: '3'
+
+vars:
+  DB_NAME: moxiedb
+
+tasks:
+  db:setup:
+    desc: Create PostgreSQL database, schema and sample data
+    cmds:
+      - createdb {{.DB_NAME}} || echo "Database '{{.DB_NAME}}' already exists or error occurred"
+      - psql -d {{.DB_NAME}} -f db/schema.sql
+      - psql -d {{.DB_NAME}} -f db/sample_data.sql
+      - echo "Database setup complete!"
