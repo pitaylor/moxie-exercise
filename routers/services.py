@@ -4,39 +4,40 @@ from models import Service
 from schemas import ServiceCreate, ServiceUpdate, ServiceResponse
 from dependencies import get_medspa_id
 
-router = APIRouter(prefix="/services", tags=["services"])
+router = APIRouter(prefix="/services", tags=["Services"])
 
 
 @router.post("/", response_model=ServiceResponse)
 def create_service(service: ServiceCreate, medspa_id: int = Depends(get_medspa_id)):
-    try:
-        new_service = Service.create(
-            medspa_id=medspa_id,
-            name=service.name,
-            description=service.description,
-            price=service.price,
-            duration_minutes=service.duration_minutes,
-        )
-        return ServiceResponse.model_validate(new_service)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+    new_service = Service.create(
+        medspa_id=medspa_id,
+        name=service.name,
+        description=service.description,
+        price=service.price,
+        duration_minutes=service.duration_minutes,
+    )
+    return ServiceResponse.model_validate(new_service)
 
 
 @router.post("/{service_id}", response_model=ServiceResponse)
-def update_service(service_id: int, service_update: ServiceUpdate, medspa_id: int = Depends(get_medspa_id)):
+def update_service(
+    service_id: int,
+    service_update: ServiceUpdate,
+    medspa_id: int = Depends(get_medspa_id),
+):
     try:
-        service = Service.get((Service.id == service_id) & (Service.medspa_id == medspa_id))
+        criteria = (Service.id == service_id) & (Service.medspa_id == medspa_id)
 
         update_data = service_update.model_dump(exclude_unset=True)
         if update_data:
-            Service.update(**update_data).where((Service.id == service_id) & (Service.medspa_id == medspa_id)).execute()
-            service = Service.get((Service.id == service_id) & (Service.medspa_id == medspa_id))
+            Service.update(**update_data).where(criteria).execute()
+
+        # Reload model with updates
+        service = Service.get(criteria)
 
         return ServiceResponse.model_validate(service)
     except Service.DoesNotExist:
         raise HTTPException(status_code=404, detail="Service not found")
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.get("/{service_id}", response_model=ServiceResponse)
