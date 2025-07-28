@@ -13,3 +13,14 @@ tasks:
       - psql -d {{.DB_NAME}} -f db/schema.sql
       - psql -d {{.DB_NAME}} -f db/sample_data.sql
       - echo "Database setup complete!"
+
+  db:drop:
+    desc: Drop PostgreSQL database
+    cmds:
+      - dropdb {{.DB_NAME}}
+
+  db:reset:
+    desc: Reset PostgreSQL database
+    deps:
+      - db:drop
+      - db:setup
