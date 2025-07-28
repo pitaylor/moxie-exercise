@@ -14,10 +14,11 @@ from peewee import (
 )
 
 DB_NAME = os.getenv("DATABASE_NAME", "moxiedb")
-DB_USER = os.getenv("DATABASE_USER", "postgres")
-DB_PASSWORD = os.getenv("DATABASE_PASSWORD", "postgres")
-DB_HOST = os.getenv("DATABASE_HOST", "localhost")
+DB_USER = os.getenv("DATABASE_USER")
+DB_PASSWORD = os.getenv("DATABASE_PASSWORD")
+DB_HOST = os.getenv("DATABASE_HOST")
 DB_PORT = os.getenv("DATABASE_PORT", "5432")
+
 db = PostgresqlDatabase(DB_NAME, user=DB_USER, password=DB_PASSWORD, host=DB_HOST, port=int(DB_PORT))
 
 

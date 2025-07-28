@@ -6,6 +6,22 @@ vars:
   DB_NAME: moxiedb
 
 tasks:
+  setup:
+    desc: Create both main and test databases
+    cmds:
+      - task: db:create
+      - task: db:create
+        vars:
+          DB_NAME: moxietestdb
+
+  teardown:
+    desc: Drop both main and test databases
+    cmds:
+      - task: db:drop
+      - task: db:drop
+        vars:
+          DB_NAME: moxietestdb
+
   start:
     desc: Start FastAPI development server
     cmd: uv run fastapi dev main.py
