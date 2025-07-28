@@ -16,11 +16,6 @@ line-length = 120
 [tool.ruff]
 line-length = 120
 
-[tool.pytest.ini_options]
-env = [
-    "DATABASE_NAME=moxietestdb"
-]
-
 [dependency-groups]
 dev = [
     "pytest>=8.4.1",
