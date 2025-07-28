@@ -10,14 +10,14 @@ class ServiceCreate(BaseModel):
     name: str
     description: Optional[str] = None
     price: Decimal
-    duration_minutes: int
+    duration: int
 
 
 class ServiceUpdate(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
     price: Optional[Decimal] = None
-    duration_minutes: Optional[int] = None
+    duration: Optional[int] = None
 
 
 class ServiceResponse(BaseModel):
@@ -26,7 +26,7 @@ class ServiceResponse(BaseModel):
     name: str
     description: Optional[str]
     price: Decimal
-    duration_minutes: int
+    duration: int
 
     class Config:
         from_attributes = True

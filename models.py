@@ -42,7 +42,7 @@ class Service(BaseModel):
     name = CharField(max_length=255)
     description = TextField(null=True)
     price = DecimalField(max_digits=10, decimal_places=2)
-    duration_minutes = IntegerField()
+    duration = IntegerField()
 
     class Meta:
         table_name = "services"

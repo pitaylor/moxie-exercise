@@ -14,7 +14,7 @@ def create_service(service: ServiceCreate, medspa_id: int = Depends(get_medspa_i
         name=service.name,
         description=service.description,
         price=service.price,
-        duration_minutes=service.duration_minutes,
+        duration=service.duration,
     )
     return ServiceResponse.model_validate(new_service)
 

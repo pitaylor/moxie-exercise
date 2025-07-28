@@ -6,11 +6,11 @@ vars:
   DB_NAME: moxiedb
 
 tasks:
-  dev:start:
+  start:
     desc: Start FastAPI development server
     cmd: uv run fastapi dev main.py
 
-  db:setup:
+  db:create:
     desc: Create PostgreSQL database, schema and sample data
     cmds:
       - createdb {{.DB_NAME}} || echo "Database '{{.DB_NAME}}' already exists or error occurred"
@@ -22,9 +22,3 @@ tasks:
     desc: Drop PostgreSQL database
     cmds:
       - dropdb {{.DB_NAME}}
-
-  db:reset:
-    desc: Reset PostgreSQL database
-    deps:
-      - db:drop
-      - db:setup
