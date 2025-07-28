@@ -23,23 +23,7 @@ CREATE TABLE appointments (
     medspa_id bigint NOT NULL REFERENCES medspas(id) ON DELETE CASCADE,
     start_time timestamp with time zone NOT NULL,
     status character varying(20) NOT NULL DEFAULT 'scheduled' CHECK (status IN ('scheduled', 'completed', 'canceled'))
-    /*,
-    total_duration integer GENERATED ALWAYS AS (
-        (SELECT COALESCE(SUM(s.duration), 0) 
-         FROM services s 
-         JOIN AppointmentService aps ON s.id = aps.service_id 
-         WHERE aps.appointment_id = appointments.id)
-    ) STORED,
-    total_price decimal(10,2) GENERATED ALWAYS AS (
-        (SELECT COALESCE(SUM(s.price), 0) 
-         FROM services s 
-         JOIN AppointmentService aps ON s.id = aps.service_id 
-         WHERE aps.appointment_id = appointments.id)
-    ) STORED,
-    */
 );
--- COMMENT ON COLUMN appointments.total_duration IS 'Total duration in minutes derived from sum of all related services durations';
--- COMMENT ON COLUMN appointments.total_price IS 'Total price in dollars derived from sum of all related services prices';
 
 -- Join table for many-to-many relationship between appointments and services
 CREATE TABLE appointments_services_through (
@@ -52,6 +36,5 @@ CREATE TABLE appointments_services_through (
 -- Indexes for better performance
 CREATE INDEX idx_services_medspa_id ON services(medspa_id);
 CREATE INDEX idx_appointments_medspa_id ON appointments(medspa_id);
-CREATE INDEX idx_appointments_start_time ON appointments(start_time);
 CREATE INDEX idx_appointments_services_through_appointment_id ON appointments_services_through(appointment_id);
 CREATE INDEX idx_appointments_services_through_service_id ON appointments_services_through(service_id);
