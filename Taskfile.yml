@@ -6,6 +6,10 @@ vars:
   DB_NAME: moxiedb
 
 tasks:
+  dev:start:
+    desc: Start FastAPI development server
+    cmd: uv run fastapi dev main.py
+
   db:setup:
     desc: Create PostgreSQL database, schema and sample data
     cmds:
