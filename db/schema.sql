@@ -12,7 +12,8 @@ CREATE TABLE services (
     name character varying(255) NOT NULL,
     description text,
     price decimal(10,2) NOT NULL,
-    duration_minutes integer NOT NULL
+    duration_minutes integer NOT NULL,
+    UNIQUE(medspa_id, name)
 );
 COMMENT ON COLUMN services.price IS 'Price in dollars';
 
