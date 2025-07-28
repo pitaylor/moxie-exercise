@@ -10,7 +10,6 @@ from peewee import (
     Model,
     PostgresqlDatabase,
 )
-from peewee_validates import validate_one_of
 
 db = PostgresqlDatabase("moxiedb")
 
@@ -53,11 +52,7 @@ class Appointment(BaseModel):
     id = BigAutoField(primary_key=True)
     medspa = ForeignKeyField(Medspa, backref="appointments", on_delete="CASCADE")
     start_time = DateTimeField()
-    status = CharField(
-        max_length=20,
-        default=AppointmentStatus.SCHEDULED.value,
-        validators=[validate_one_of([s.value for s in AppointmentStatus])],
-    )
+    status = CharField(max_length=20, default=AppointmentStatus.SCHEDULED.value)
 
     class Meta:
         table_name = "appointments"

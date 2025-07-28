@@ -7,7 +7,6 @@ requires-python = ">=3.13"
 dependencies = [
     "fastapi[standard]>=0.116.1",
     "peewee>=3.18.2",
-    "peewee-validates>=1.0.6",
     "psycopg2>=2.9.10",
 ]
 
