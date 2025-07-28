@@ -10,7 +10,6 @@ from peewee import (
     Model,
     PostgresqlDatabase,
     ManyToManyField,
-    DeferredThroughModel,
 )
 
 db = PostgresqlDatabase("moxiedb")
@@ -50,10 +49,6 @@ class Service(BaseModel):
         table_name = "services"
 
 
-# Allows us to define the ManyToManyField on Appointment before the AppointmentService model is declared
-# AppointmentServiceDeferred = DeferredThroughModel()
-
-
 class Appointment(BaseModel):
     id = BigAutoField(primary_key=True)
     medspa = ForeignKeyField(Medspa, backref="appointments", on_delete="CASCADE")
@@ -71,15 +66,6 @@ class Appointment(BaseModel):
 
     class Meta:
         table_name = "appointments"
-
-
-# class AppointmentService(BaseModel):
-#     id = BigAutoField(primary_key=True)
-#     appointment = ForeignKeyField(Appointment, backref="appointment_services", on_delete="CASCADE")
-#     service = ForeignKeyField(Service, backref="appointment_services", on_delete="CASCADE")
-
-#     class Meta:
-#         table_name = "appointment_services"
 
 
 AppointmentService = Appointment.services.get_through_model()
