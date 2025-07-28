@@ -3,6 +3,8 @@ from decimal import Decimal
 from typing import Optional, List, Literal
 from datetime import datetime
 
+AppointmentStatusLiteral = Literal["scheduled", "completed", "canceled"]
+
 
 class ServiceCreate(BaseModel):
     name: str
@@ -33,7 +35,11 @@ class ServiceResponse(BaseModel):
 class AppointmentCreate(BaseModel):
     start_time: datetime
     service_ids: List[int]
-    status: Optional[Literal["scheduled", "completed", "canceled"]] = "scheduled"
+    status: Optional[AppointmentStatusLiteral] = "scheduled"
+
+
+class AppointmentUpdate(BaseModel):
+    status: AppointmentStatusLiteral
 
 
 class AppointmentResponse(BaseModel):

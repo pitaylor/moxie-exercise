@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends
 from typing import List
 from models import Appointment, AppointmentService, Service
-from schemas import AppointmentCreate, AppointmentResponse, ServiceResponse
+from schemas import AppointmentCreate, AppointmentUpdate, AppointmentResponse, ServiceResponse
 from dependencies import get_medspa_id
 
 router = APIRouter(prefix="/appointments", tags=["Appointments"])
@@ -32,6 +32,52 @@ def create_appointment(appointment: AppointmentCreate, medspa_id: int = Depends(
         medspa_id=new_appointment.medspa_id,
         start_time=new_appointment.start_time,
         status=new_appointment.status,
+        services=services_data,
+    )
+
+
+@router.patch("/{appointment_id}", response_model=AppointmentResponse)
+def update_appointment(
+    appointment_id: int, appointment_update: AppointmentUpdate, medspa_id: int = Depends(get_medspa_id)
+):
+    try:
+        appointment = Appointment.get((Appointment.id == appointment_id) & (Appointment.medspa_id == medspa_id))
+    except Appointment.DoesNotExist:
+        raise HTTPException(status_code=404, detail="Appointment not found")
+
+    # Update status
+    appointment.status = appointment_update.status
+    appointment.save()
+
+    # Get services for response
+    services = Service.select().join(AppointmentService).where(AppointmentService.appointment_id == appointment.id)
+    services_data = [ServiceResponse.model_validate(service) for service in services]
+
+    return AppointmentResponse(
+        id=appointment.id,
+        medspa_id=appointment.medspa_id,
+        start_time=appointment.start_time,
+        status=appointment.status,
+        services=services_data,
+    )
+
+
+@router.get("/{appointment_id}", response_model=AppointmentResponse)
+def get_appointment(appointment_id: int, medspa_id: int = Depends(get_medspa_id)):
+    try:
+        appointment = Appointment.get((Appointment.id == appointment_id) & (Appointment.medspa_id == medspa_id))
+    except Appointment.DoesNotExist:
+        raise HTTPException(status_code=404, detail="Appointment not found")
+
+    # Get services for this appointment
+    services = Service.select().join(AppointmentService).where(AppointmentService.appointment_id == appointment.id)
+    services_data = [ServiceResponse.model_validate(service) for service in services]
+
+    return AppointmentResponse(
+        id=appointment.id,
+        medspa_id=appointment.medspa_id,
+        start_time=appointment.start_time,
+        status=appointment.status,
         services=services_data,
     )
 
