@@ -1,3 +1,4 @@
+from enum import Enum
 from peewee import (
     BigAutoField,
     CharField,
@@ -5,11 +6,19 @@ from peewee import (
     ForeignKeyField,
     IntegerField,
     DecimalField,
+    DateTimeField,
     Model,
     PostgresqlDatabase,
 )
+from peewee_validates import validate_one_of
 
 db = PostgresqlDatabase("moxiedb")
+
+
+class AppointmentStatus(Enum):
+    SCHEDULED = "scheduled"
+    COMPLETED = "completed"
+    CANCELED = "canceled"
 
 
 class BaseModel(Model):
@@ -38,3 +47,26 @@ class Service(BaseModel):
 
     class Meta:
         table_name = "services"
+
+
+class Appointment(BaseModel):
+    id = BigAutoField(primary_key=True)
+    medspa = ForeignKeyField(Medspa, backref="appointments", on_delete="CASCADE")
+    start_time = DateTimeField()
+    status = CharField(
+        max_length=20,
+        default=AppointmentStatus.SCHEDULED.value,
+        validators=[validate_one_of([s.value for s in AppointmentStatus])],
+    )
+
+    class Meta:
+        table_name = "appointments"
+
+
+class AppointmentService(BaseModel):
+    id = BigAutoField(primary_key=True)
+    appointment = ForeignKeyField(Appointment, backref="appointment_services", on_delete="CASCADE")
+    service = ForeignKeyField(Service, backref="appointment_services", on_delete="CASCADE")
+
+    class Meta:
+        table_name = "appointment_services"
