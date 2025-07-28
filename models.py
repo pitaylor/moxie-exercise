@@ -9,6 +9,8 @@ from peewee import (
     DateTimeField,
     Model,
     PostgresqlDatabase,
+    ManyToManyField,
+    DeferredThroughModel,
 )
 
 db = PostgresqlDatabase("moxiedb")
@@ -48,20 +50,36 @@ class Service(BaseModel):
         table_name = "services"
 
 
+# Allows us to define the ManyToManyField on Appointment before the AppointmentService model is declared
+# AppointmentServiceDeferred = DeferredThroughModel()
+
+
 class Appointment(BaseModel):
     id = BigAutoField(primary_key=True)
     medspa = ForeignKeyField(Medspa, backref="appointments", on_delete="CASCADE")
     start_time = DateTimeField()
     status = CharField(max_length=20, default=AppointmentStatus.SCHEDULED.value)
+    services = ManyToManyField(Service, backref="appointments")
+
+    @property
+    def total_duration(self):
+        return sum(service.duration for service in self.services)
+
+    @property
+    def total_price(self):
+        return sum(service.price for service in self.services)
 
     class Meta:
         table_name = "appointments"
 
 
-class AppointmentService(BaseModel):
-    id = BigAutoField(primary_key=True)
-    appointment = ForeignKeyField(Appointment, backref="appointment_services", on_delete="CASCADE")
-    service = ForeignKeyField(Service, backref="appointment_services", on_delete="CASCADE")
+# class AppointmentService(BaseModel):
+#     id = BigAutoField(primary_key=True)
+#     appointment = ForeignKeyField(Appointment, backref="appointment_services", on_delete="CASCADE")
+#     service = ForeignKeyField(Service, backref="appointment_services", on_delete="CASCADE")
 
-    class Meta:
-        table_name = "appointment_services"
+#     class Meta:
+#         table_name = "appointment_services"
+
+
+AppointmentService = Appointment.services.get_through_model()

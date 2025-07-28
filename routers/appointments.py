@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends
 from typing import List
-from models import Appointment, AppointmentService, Service
+from peewee import prefetch
+from models import Appointment, Service, AppointmentService
 from schemas import AppointmentCreate, AppointmentUpdate, AppointmentResponse, ServiceResponse
 from dependencies import get_medspa_id
 
@@ -21,9 +22,8 @@ def create_appointment(appointment: AppointmentCreate, medspa_id: int = Depends(
         medspa_id=medspa_id, start_time=appointment.start_time, status=appointment.status
     )
 
-    # Create appointment-service relationships
-    for service_id in appointment.service_ids:
-        AppointmentService.create(appointment=new_appointment, service_id=service_id)
+    # Associate services with appointment using M2M relationship
+    new_appointment.services.add(services)
 
     services_data = [ServiceResponse.model_validate(service) for service in services]
 
@@ -33,6 +33,8 @@ def create_appointment(appointment: AppointmentCreate, medspa_id: int = Depends(
         start_time=new_appointment.start_time,
         status=new_appointment.status,
         services=services_data,
+        total_duration=new_appointment.total_duration,
+        total_price=new_appointment.total_price,
     )
 
 
@@ -49,9 +51,7 @@ def update_appointment(
     appointment.status = appointment_update.status
     appointment.save()
 
-    # Get services for response
-    services = Service.select().join(AppointmentService).where(AppointmentService.appointment_id == appointment.id)
-    services_data = [ServiceResponse.model_validate(service) for service in services]
+    services_data = [ServiceResponse.model_validate(service) for service in appointment.services]
 
     return AppointmentResponse(
         id=appointment.id,
@@ -59,6 +59,8 @@ def update_appointment(
         start_time=appointment.start_time,
         status=appointment.status,
         services=services_data,
+        total_duration=appointment.total_duration,
+        total_price=appointment.total_price,
     )
 
 
@@ -69,9 +71,7 @@ def get_appointment(appointment_id: int, medspa_id: int = Depends(get_medspa_id)
     except Appointment.DoesNotExist:
         raise HTTPException(status_code=404, detail="Appointment not found")
 
-    # Get services for this appointment
-    services = Service.select().join(AppointmentService).where(AppointmentService.appointment_id == appointment.id)
-    services_data = [ServiceResponse.model_validate(service) for service in services]
+    services_data = [ServiceResponse.model_validate(service) for service in appointment.services]
 
     return AppointmentResponse(
         id=appointment.id,
@@ -79,19 +79,20 @@ def get_appointment(appointment_id: int, medspa_id: int = Depends(get_medspa_id)
         start_time=appointment.start_time,
         status=appointment.status,
         services=services_data,
+        total_duration=appointment.total_duration,
+        total_price=appointment.total_price,
     )
 
 
 @router.get("/", response_model=List[AppointmentResponse])
 def get_all_appointments(medspa_id: int = Depends(get_medspa_id)):
-    appointments = Appointment.select().where(Appointment.medspa_id == medspa_id).order_by(Appointment.start_time)
+    # todo: prefetch services
+    appointments = Appointment.select().where(Appointment.medspa_id == medspa_id)
 
     result = []
-    for appointment in appointments:
-        # TODO: fix n+1
-        services = Service.select().join(AppointmentService).where(AppointmentService.appointment_id == appointment.id)
 
-        services_data = [ServiceResponse.model_validate(service) for service in services]
+    for appointment in appointments:
+        services_data = [ServiceResponse.model_validate(service) for service in appointment.services]
 
         result.append(
             AppointmentResponse(
@@ -100,6 +101,8 @@ def get_all_appointments(medspa_id: int = Depends(get_medspa_id)):
                 start_time=appointment.start_time,
                 status=appointment.status,
                 services=services_data,
+                total_duration=appointment.total_duration,
+                total_price=appointment.total_price,
             )
         )
 

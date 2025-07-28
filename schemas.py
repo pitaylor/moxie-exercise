@@ -48,6 +48,8 @@ class AppointmentResponse(BaseModel):
     start_time: datetime
     status: str
     services: List[ServiceResponse]
+    total_duration: int
+    total_price: Decimal
 
     class Config:
         from_attributes = True
