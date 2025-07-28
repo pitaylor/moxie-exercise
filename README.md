@@ -36,7 +36,7 @@ task test
 
 ### API Usage
 
-The API will be available at `http://localhost:8000`. The interactive Swagger UI can be accessed at `http://localhost:8000/docs`.
+The API will be available at http://localhost:8000. The interactive Swagger UI can be accessed at http://localhost:8000/docs.
 
 All API requests require a `X-Medspa-ID` header to identify the medspa.
 
